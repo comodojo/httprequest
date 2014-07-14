@@ -1,0 +1,15 @@
+{
+    "name": "comodojo/dispatcher.library.httprequest",
+    "description": "HTTP request library for comodojo/dispatcher.framework",
+    "authors": [
+        {
+            "name": "comodojo",
+            "email": "info@comodojo.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "comodojo\\DispatcherLibrary\\": "src"
+        }
+    }
+}
