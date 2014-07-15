@@ -1,9 +1,21 @@
 {
     "name": "comodojo/dispatcher.library.httprequest",
     "description": "HTTP request library for comodojo/dispatcher.framework",
+    "license": "GPL-3.0+",
+    "type": "library",
+    "keywords": [
+        "comodojo",
+        "dispatcher",
+        "http",
+        "request"
+    ],
+    "homepage": "http://dispatcher.comodojo.org",
+     "support": {
+        "issues": "https://github.com/comodojo/dispatcher.library.httprequest/issues"
+    },
     "authors": [
         {
-            "name": "comodojo",
+            "name": "Marco Giovinazzi",
             "email": "info@comodojo.org"
         }
     ],
