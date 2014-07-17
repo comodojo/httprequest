@@ -24,7 +24,6 @@
  */
 
 use \comodojo\Exception\IOException;
-use \comodojo\Dispatcher\debug;
  
 class httprequest {
 
@@ -142,25 +141,7 @@ class httprequest {
 	 */
 	private $curl = true;
 	
-	/**
-	 * Remote host 
-	 * @var string
-	 */
-	private $remoteHost = NULL;
-
-	/**
-	 * Remote host path
-	 * @var string
-	 */
-	private $remotePath = NULL;
-	
-	/**
-	 * Remote query string
-	 * @var string
-	 */
-	private $remoteQuery = NULL;
-
-	private $receivedHeaders = NULL;
+	private $receivedHeaders = Array();
 
 	/**
 	 * Transfer channel
@@ -168,39 +149,32 @@ class httprequest {
 	 */
 	private $ch = false;
 
-	private $buffer = 4096;
 /********************** PRIVATE VARS *********************/
 	
 /********************* PUBLIC METHODS ********************/
 	
 	public final function __construct($address, $curl=true) {
 
-		if ( empty($address) ) throw new IOException("Invalid remote host");
-		
 		$curl = filter_var($curl, FILTER_VALIDATE_BOOLEAN);
+
+		$url = filter_var($address, FILTER_VALIDATE_URL);
+
+		if ( $url === false ) throw new IOException("Invalid remote address");
+		
+		$this->address = $address;
 
 		if ( !function_exists("curl_init") OR !$curl ) {
 			
 			$this->curl = false;
 			
-			$this->address = $address;
-			
-			$url = parse_url($address);
-			
-			$this->remoteHost = isset($url['host']) ? $url['host'] : '';
-			$this->remotePath = isset($url['path']) ? $url['path'] : '';
-			$this->remoteQuery = isset($url['query']) ? $url['query'] : '';
-
-			debug("httprequest will use fsock (compatibility mode)","DEBUG","httprequest");
+			\comodojo\Dispatcher\debug("httprequest will use streams (compatibility mode)","DEBUG","httprequest");
 
 		}
 		else {
 
 			$this->curl = true;
 
-			$this->address = $address;
-
-			debug("httprequest will use curl","DEBUG","httprequest");
+			\comodojo\Dispatcher\debug("httprequest will use curl","DEBUG","httprequest");
 
 		}
 
@@ -208,7 +182,7 @@ class httprequest {
 
 	public final function __destruct() {
 
-		if ( $this->ch !== false ) $this->close_transport;
+		if ( $this->ch !== false ) $this->close_transport();
 
 	}
 
@@ -227,7 +201,7 @@ class httprequest {
 
 		if ( !in_array($method, $this->supported_auth_methods) ) {
 
-			debug($method." is not a valid auth method", "ERROR", "httprequest");
+			\comodojo\Dispatcher\debug($method." is not a valid auth method", "ERROR", "httprequest");
 
 			throw new IOException("Unsupported authentication method");
 
@@ -242,7 +216,7 @@ class httprequest {
 		$this->user = $user;
 		$this->pass = $pass;
 		
-		//debug("Using auth method: ".$method,"DEBUG","httprequest");
+		//\comodojo\Dispatcher\debug("Using auth method: ".$method,"DEBUG","httprequest");
 		
 		return $this;
 
@@ -261,7 +235,7 @@ class httprequest {
 
 		$this->userAgent = $ua;
 
-		//debug("Using user agent: ".$ua, "DEBUG", "httprequest");
+		//\comodojo\Dispatcher\debug("Using user agent: ".$ua, "DEBUG", "httprequest");
 
 		return $this;
 
@@ -280,7 +254,7 @@ class httprequest {
 
 		$this->timeout = $time;
 
-		//debug("Timeout: ".$time,"DEBUG","httprequest");
+		//\comodojo\Dispatcher\debug("Timeout: ".$time,"DEBUG","httprequest");
 
 		return $this;
 
@@ -306,7 +280,7 @@ class httprequest {
 
 		}
 		
-		//debug("Using http version: ".$version,"DEBUG","http");
+		//\comodojo\Dispatcher\debug("Using http version: ".$version,"DEBUG","http");
 
 		return $this;
 
@@ -325,7 +299,7 @@ class httprequest {
 
 		$this->contentType = $type;
 
-		//debug("Using content type: ".$type,"DEBUG","httprequest");
+		//\comodojo\Dispatcher\debug("Using content type: ".$type,"DEBUG","httprequest");
 
 		return $this;
 
@@ -348,29 +322,8 @@ class httprequest {
 			)
 		);
 		
-		//debug("Using port: ".$port,"DEBUG","httprequest");
+		//\comodojo\Dispatcher\debug("Using port: ".$port,"DEBUG","httprequest");
 
-		return $this;
-
-	}
-
-	/**
-	 * Set FSOCK buffer size
-	 *
-	 * @param	integer	$size
-	 *
-	 * @return 	Object 	$this
-	 */
-	public final function setBuffer($size) {
-
-		$this->buffer = filter_var($size, FILTER_VALIDATE_INT, array(
-			"options" => array(
-				"min_range" => 128,
-				"default" => 4096
-				)
-			)
-		);
-		
 		return $this;
 
 	}
@@ -388,7 +341,7 @@ class httprequest {
 
 		if ( !in_array($method, $this->supported_http_methods) ) {
 
-			debug($method." is not currently supported", "ERROR", "httprequest");
+			\comodojo\Dispatcher\debug($method." is not currently supported", "ERROR", "httprequest");
 
 			throw new IOException("Unsupported HTTP method");
 
@@ -396,7 +349,7 @@ class httprequest {
 
 		$this->method = $method;
 
-		//debug("Using method: ".$method,"DEBUG","httprequest");
+		//\comodojo\Dispatcher\debug("Using method: ".$method,"DEBUG","httprequest");
 
 		return $this;
 
@@ -423,7 +376,7 @@ class httprequest {
 
 			$this->proxy_auth = $user.':'.$pass;
 
-			//debug("Using proxy: ".$user."@".$address,"DEBUG","httprequest");
+			//\comodojo\Dispatcher\debug("Using proxy: ".$user."@".$address,"DEBUG","httprequest");
 
 		}
 		else if ( !is_null($user) ) {
@@ -454,7 +407,7 @@ class httprequest {
 	}
 
 
-	public final function getReceivedHeaderss() {
+	public final function getReceivedHeaders() {
 
 		return $this->receivedHeaders;
 
@@ -465,19 +418,19 @@ class httprequest {
 	 * 
 	 * @return	string	Received Data
 	 */
-	public function send($data = null) {
+	public function send($data = NULL) {
 		
-		debug("------ Ready to send data ------ ","DEBUG","httprequest");
-		debug("-> Remote address: ".$this->address,"DEBUG","httprequest");
-		debug("------- Start Data Dump ------ ","DEBUG","httprequest");
-		debug($data,"DEBUG","httprequest");
-		debug("-------- End Data Dump ------- ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("------ Ready to send data ------ ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("-> Remote address: ".$this->address,"DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("------- Start Data Dump ------ ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug($data,"DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("-------- End Data Dump ------- ","DEBUG","httprequest");
 
 		try {
 		
-			$init = $this->curl ? $this->init_curl($data) : $this->init_fsock($data);
+			$init = $this->curl ? $this->init_curl($data) : $this->init_stream($data);
 
-			$received = $this->curl ? $this->send_curl() : $this->send_fsock($init);
+			$received = $this->curl ? $this->send_curl() : $this->send_stream();
 
 		} catch (IOException $ioe) {
 			
@@ -485,12 +438,38 @@ class httprequest {
 
 		}
 
-		$this->close_transport();
+		\comodojo\Dispatcher\debug("-------- Received data --------- ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("------- Start Data Dump ------ ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug($received,"DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("-------- End Data Dump ------- ","DEBUG","httprequest");
+
+		return $received;
+
+	}
+
+	/**
+	 * Init transport and get remote content
+	 * 
+	 * @return	string	Received Data
+	 */
+	public function get() {
 		
-		debug("-------- Received data --------- ","DEBUG","httprequest");
-		debug("------- Start Data Dump ------ ","DEBUG","httprequest");
-		debug($received,"DEBUG","httprequest");
-		debug("-------- End Data Dump ------- ","DEBUG","httprequest");
+		try {
+		
+			$init = $this->curl ? $this->init_curl(NULL) : $this->init_stream(NULL);
+
+			$received = $this->curl ? $this->send_curl() : $this->send_stream();
+
+		} catch (IOException $ioe) {
+			
+			throw $ioe;
+
+		}
+
+		\comodojo\Dispatcher\debug("-------- Received data --------- ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("------- Start Data Dump ------ ","DEBUG","httprequest");
+		\comodojo\Dispatcher\debug($received,"DEBUG","httprequest");
+		\comodojo\Dispatcher\debug("-------- End Data Dump ------- ","DEBUG","httprequest");
 
 		return $received;
 
@@ -533,19 +512,7 @@ class httprequest {
 
 		$this->proxy_auth = NULL;
 
-		$this->supported_auth_methods = Array("BASIC","NTLM");
-
-		$this->supported_http_methods = Array("GET","POST","PUT","DELETE");
-
-		$this->curl = true;
-
-		$this->remoteHost = NULL;
-
-		$this->remotePath = NULL;
-
-		$this->remoteQuery = NULL;
-
-		$this->receivedHeaders = NULL;
+		$this->receivedHeaders = Array();
 
 		$this->buffer = 4096;
 
@@ -615,7 +582,7 @@ class httprequest {
 		switch ($this->method) {
 			
 			case 'GET':
-				curl_setopt($this->ch, CURLOPT_URL, $this->address.'?'.http_build_query($data));
+				curl_setopt($this->ch, CURLOPT_URL, $this->address);
 				break;
 			
 			case 'PUT':
@@ -647,9 +614,11 @@ class httprequest {
 
 			$headers = Array();
 
-			foreach ($this->getHeaders as $header => $value) {
+			foreach ($this->getHeaders() as $header => $value) {
 				
-				array_push($headers, $this->parseHeader($header, $value));
+				if ( is_null($value) ) array_push($headers, $header);
+			
+				else array_push($headers, $header.': '.$value);
 
 			}
 
@@ -664,31 +633,39 @@ class httprequest {
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER,		$headers);
 		curl_setopt($this->ch, CURLOPT_HEADER,			1);
 
-		return NULL;
-
 	}
 
-	private function init_fsock($data) {
+	private function init_stream($data) {
 
-		if ($this->authenticationMethod == 'NTLM') throw new IOException("NTLM auth with FSOCKS is not supported");
+		if ($this->authenticationMethod == 'NTLM') throw new IOException("NTLM auth with streams is not supported");
 
-		debug("Using httprequest in compatible mode; some features will not be available","WARNING","httprequest");
+		$stream_options = Array(
+			'http'	=>	Array(
+				'method'			=>	$this->method,
+				'protocol_version'	=>	$this->httpVersion == "NONE" ? "1.0" : $this->httpVersion,
+				'user_agent'		=>	$this->userAgent,
+				'timeout'			=>	$this->timeout,
+				'header'			=>	Array(
+					'Connection: close'
+				)
+			)
+		);
 
-		$httpVersion = $this->httpVersion == "NONE" ? "1.0" : $this->httpVersion;
+		if ( !is_null($this->proxy) ) {
 
-		$crlf = "\r\n";
+			$stream_options['http']['proxy'] = $this->proxy;
 
-		$header  = $this->method.' '.$this->remotePath.$this->remoteQuery.' HTTP/'.$httpVersion.$crlf;
-		$header .= "User-Agent: ".$this->userAgent.$crlf;
-		$header .= "Host: ".$this->remoteHost.$crlf;
+			if ( !is_null($this->proxy_auth) ) array_push($stream_options['http']['header'], 'Proxy-Authorization: Basic '.base64_encode($this->proxy_auth));
 
-		if ($this->authenticationMethod == "BASIC") $header .= "Authorization: Basic ".base64_encode($this->userName.":".$this->userPass).$crlf;
+		}
+
+		if ($this->authenticationMethod == "BASIC") array_push($stream_options['http']['header'], 'Authorization: Basic  '.base64_encode($this->userName.":".$this->userPass));
 		
-		if ($this->proxy_auth !== null) $header .= "Proxy-Authorization: Basic ".base64_encode($this->proxy_auth).$crlf;
+		foreach ($this->getHeaders() as $header => $value) {
 
-		foreach ($this->getHeaders as $header => $value) {
-
-			$header .= $this->parseHeader($header, $value).$crlf;
+			if ( is_null($value) ) array_push($stream_options['http']['header'], $header);
+			
+			else array_push($stream_options['http']['header'], $header.': '.$value);
 
 		}
 
@@ -696,48 +673,32 @@ class httprequest {
 
 			//$data = urlencode($data);
 
-			$header .= "Content-Type: ".$this->contentType.$crlf;
-			$header .= "Content-Length: ".strlen($data).$crlf.$crlf;
+			array_push($stream_options['http']['header'], 'Content-Type: '.$this->contentType);
+			array_push($stream_options['http']['header'], 'Content-Length: '.strlen($data));
 
-			$return = $header.$data;
-
+			$stream_options['http']['content'] = $data;
+			
 		}
 
-		else $return = $header.$crlf;
-
-		if ( is_null($this->proxy) ) $this->ch = fsockopen($this->remoteHost, $this->port, $errno, $errstr, $this->timeout);
-		
-		else {
-
-			$proxy = parse_url($this->proxy);
-			$proxy_host = $url['host'];
-			$proxy_port = isset($url['port']) ? $url['port'] : '80';
-
-			$this->ch = fsockopen($proxy_host, $proxy_port, $errno, $errstr, $this->timeout);
-
-		}
+		$this->ch = stream_context_create($stream_options);
 
 		if ( !$this->ch ) {
 
-			debug("Cannot init data channel: (".$errno.") ".$errstr,"ERROR","httprequest");
+			\comodojo\Dispatcher\debug("Cannot init data channel","ERROR","httprequest");
 
 			throw new IOException("Cannot init data channel");
 
 		}
 
-		stream_set_timeout($this->ch, $this->timeout); 
-
-		return $return;
-
 	}
 
 	private function send_curl() {
 
-		$body = curl_exec($this->ch);
+		$request = curl_exec($this->ch);
 		
-		if ( $body === false ) {
+		if ( $request === false ) {
 				
-			debug("Curl request error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","httprequest");
+			\comodojo\Dispatcher\debug("Curl request error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","httprequest");
 
 			throw new IOException(curl_error($this->ch), curl_errno($this->ch));
 
@@ -745,31 +706,62 @@ class httprequest {
 
 		$header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
 
-		$this->receivedHeaders = substr($body, 0, $header_size);
+		$headers = substr($request, 0, $header_size);
 
-		return substr($body, $header_size);
+		$body = substr($request, $header_size);
+
+		$this->receivedHeaders = $this->tokenize_headers($headers);
+
+		return $body;
 
 	}
 
-	private function send_fsock($data) {
+	private function send_stream() {
 
-		$body = '';
+		if ( $this->port == 80 ) {
+
+			$host = $this->address;
+
+		}
+		else {
+
+			$host = substr($this->address, -1) == "/" ? substr($this->address, 0, -1).':'.$this->port : $this->address.':'.$this->port;
+
+		}
+
+		$received = file_get_contents($host, false, $this->ch);
 		
-		$receiver = fwrite($this->ch, $data, strlen($data));
-		
-		if ( $receiver === false ) {
+		if ( $received === false ) {
 				
-			debug("FSOCK request error","ERROR","httprequest");
+			\comodojo\Dispatcher\debug("Stream request error","ERROR","httprequest");
 			
-			throw new Exception("Cannot write to socket");
+			throw new IOException("Cannot read stream socket");
 
 		}
 		
-		while( !feof($this->ch) ) $body .= fgets($this->ch, $this->buffer); 
-			
-		list($this->receivedHeaders, $received) = preg_split("/\R\R/", $body, 2);
-
+		$this->receivedHeaders = $this->tokenize_headers(implode("\r\n", $http_response_header));
+		
 		return $received;
+
+	}
+
+	private function tokenize_headers($headers) {
+
+		$return = Array();
+
+		foreach (explode("\r\n", $headers) as $header) {
+			
+			if ( empty($header) ) continue;
+
+			$header_components = explode(":", $header);
+
+			if ( !isset($header_components[1]) OR @empty($header_components[1]) ) array_push($return, $header_components[0]);
+
+			else $return[$header_components[0]] = $header_components[1];
+
+		}
+
+		return $return;
 
 	}
 
@@ -781,11 +773,6 @@ class httprequest {
 		if ($this->curl) {
 
 			curl_close($this->ch);
-
-		}
-		else {
-
-			fclose($this->ch);
 
 		}
 
