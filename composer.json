@@ -1,17 +1,16 @@
 {
-    "name": "comodojo/dispatcher.library.httprequest",
-    "description": "HTTP request library for comodojo/dispatcher.framework",
+    "name": "comodojo/httprequest",
+    "description": "HTTP request library for comodojo",
     "license": "GPL-3.0+",
     "type": "library",
     "keywords": [
         "comodojo",
-        "dispatcher",
         "http",
         "request"
     ],
-    "homepage": "http://dispatcher.comodojo.org",
+    "homepage": "http://www.comodojo.org",
      "support": {
-        "issues": "https://github.com/comodojo/dispatcher.library.httprequest/issues"
+        "issues": "https://github.com/comodojo/httprequest/issues"
     },
     "authors": [
         {
@@ -21,7 +20,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "comodojo\\DispatcherLibrary\\": "src"
+            "Comodojo\\Exception\\": "src/Exception",
+            "Comodojo\\Httprequest\\": "src"
         }
     }
 }
