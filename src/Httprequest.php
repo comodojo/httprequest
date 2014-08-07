@@ -1,5 +1,7 @@
 <?php namespace Comodojo\Httprequest;
 
+use \Comodojo\Exception\HttpException;
+
 /**
  * HTTP requests library for comodojo   
  * 
@@ -22,8 +24,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-use \Comodojo\Exception\HttpException;
  
 class Httprequest {
 
