@@ -5,8 +5,8 @@ use \Comodojo\Exception\HttpException;
 /**
  * HTTP requests library for comodojo   
  * 
- * @package     Comodojo dispatcher (Spare Parts)
- * @author      comodojo <info@comodojo.org>
+ * @package     Comodojo Spare Parts
+ * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
