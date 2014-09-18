@@ -100,11 +100,11 @@ class Httprequest {
     private $contentType = 'application/x-www-form-urlencoded';
 
     /**
-     * Array of headers to send
+     * array of headers to send
      *
      * @var array
      */
-    private $headers = Array(
+    private $headers = array(
         'Accept'            =>  'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language'   =>  'en-us,en;q=0.5',
         'Accept-Encoding'   =>  'deflate',
@@ -125,14 +125,14 @@ class Httprequest {
      *
      * @var array
      */
-    private $supported_auth_methods = Array("BASIC","NTLM");
+    private $supported_auth_methods = array("BASIC","NTLM");
 
     /**
      * Allowed HTTP authentication
      *
      * @var array
      */
-    private $supported_http_methods = Array("GET","POST","PUT","DELETE");
+    private $supported_http_methods = array("GET","POST","PUT","DELETE");
 
 
     /**
@@ -140,7 +140,7 @@ class Httprequest {
      */
     private $curl = true;
     
-    private $receivedHeaders = Array();
+    private $receivedHeaders = array();
 
     /**
      * Transfer channel
@@ -264,7 +264,7 @@ class Httprequest {
      */
     public final function setHttpVersion($ver) {
 
-        if ( !in_array($ver, Array("1.0","1.1")) ) {
+        if ( !in_array($ver, array("1.0","1.1")) ) {
             
             $this->httpVersion = "NONE";
         
@@ -415,12 +415,6 @@ class Httprequest {
      */
     public function send($data = NULL) {
         
-        // \comodojo\Dispatcher\debug("------ Ready to send data ------ ","DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("-> Remote address: ".$this->address,"DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("------- Start Data Dump ------ ","DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug($data,"DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("-------- End Data Dump ------- ","DEBUG","httprequest");
-
         try {
         
             $init = $this->curl ? $this->init_curl($data) : $this->init_stream($data);
@@ -432,11 +426,6 @@ class Httprequest {
             throw $ioe;
 
         }
-
-        // \comodojo\Dispatcher\debug("-------- Received data --------- ","DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("------- Start Data Dump ------ ","DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug($received,"DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("-------- End Data Dump ------- ","DEBUG","httprequest");
 
         return $received;
 
@@ -460,11 +449,6 @@ class Httprequest {
             throw $ioe;
 
         }
-
-        // \comodojo\Dispatcher\debug("-------- Received data --------- ","DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("------- Start Data Dump ------ ","DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug($received,"DEBUG","httprequest");
-        // \comodojo\Dispatcher\debug("-------- End Data Dump ------- ","DEBUG","httprequest");
 
         return $received;
 
@@ -496,7 +480,7 @@ class Httprequest {
 
         $this->contentType = 'application/x-www-form-urlencoded';
 
-        $this->headers = Array(
+        $this->headers = array(
             'Accept'            =>  'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language'   =>  'en-us,en;q=0.5',
             'Accept-Encoding'   =>  'deflate',
@@ -507,7 +491,7 @@ class Httprequest {
 
         $this->proxy_auth = NULL;
 
-        $this->receivedHeaders = Array();
+        $this->receivedHeaders = array();
 
         $this->buffer = 4096;
 
@@ -604,7 +588,7 @@ class Httprequest {
 
         if ( sizeof($this->headers) != 0 ) {
 
-            $headers = Array();
+            $headers = array();
 
             foreach ($this->getHeaders() as $header => $value) {
                 
@@ -615,7 +599,7 @@ class Httprequest {
             }
 
         }
-        else $headers = Array();
+        else $headers = array();
 
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER,  1);
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION,  1);
@@ -631,13 +615,13 @@ class Httprequest {
 
         if ($this->authenticationMethod == 'NTLM') throw new HttpException("NTLM auth with streams is not supported");
 
-        $stream_options = Array(
-            'http'  =>  Array(
+        $stream_options = array(
+            'http'  =>  array(
                 'method'            =>  $this->method,
                 'protocol_version'  =>  $this->httpVersion == "NONE" ? "1.0" : $this->httpVersion,
                 'user_agent'        =>  $this->userAgent,
                 'timeout'           =>  $this->timeout,
-                'header'            =>  Array(
+                'header'            =>  array(
                     'Connection: close'
                 )
             )
@@ -739,7 +723,7 @@ class Httprequest {
 
     private function tokenize_headers($headers) {
 
-        $return = Array();
+        $return = array();
 
         foreach (explode("\r\n", $headers) as $header) {
             
