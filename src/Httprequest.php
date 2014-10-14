@@ -134,16 +134,28 @@ class Httprequest {
      */
     private $supported_http_methods = array("GET","POST","PUT","DELETE");
 
-
     /**
      * Are we using curl?
      */
     private $curl = true;
     
+    /**
+     * Received headers
+     *
+     * @var array
+     */
     private $receivedHeaders = array();
 
     /**
+     * Received http status code
+     *
+     * @var int
+     */
+    private $receivedHttpStatus = null;
+
+    /**
      * Transfer channel
+     *
      * @var resource
      */
     private $ch = false;
@@ -162,14 +174,9 @@ class Httprequest {
             
             $this->curl = false;
             
-            // \comodojo\Dispatcher\debug("httprequest will use streams (compatibility mode)","DEBUG","httprequest");
-
-        }
-        else {
+        } else {
 
             $this->curl = true;
-
-            // \comodojo\Dispatcher\debug("httprequest will use curl","DEBUG","httprequest");
 
         }
 
@@ -196,8 +203,6 @@ class Httprequest {
 
         if ( !in_array($method, $this->supported_auth_methods) ) {
 
-            // \comodojo\Dispatcher\debug($method." is not a valid auth method", "ERROR", "httprequest");
-
             throw new HttpException("Unsupported authentication method");
 
         }
@@ -210,9 +215,7 @@ class Httprequest {
 
         $this->user = $user;
         $this->pass = $pass;
-        
-        // \comodojo\Dispatcher\debug("Using auth method: ".$method,"DEBUG","httprequest");
-        
+                
         return $this;
 
     }
@@ -230,8 +233,6 @@ class Httprequest {
 
         $this->userAgent = $ua;
 
-        // \comodojo\Dispatcher\debug("Using user agent: ".$ua, "DEBUG", "httprequest");
-
         return $this;
 
     }
@@ -248,8 +249,6 @@ class Httprequest {
         $time = filter_var($sec, FILTER_VALIDATE_INT);
 
         $this->timeout = $time;
-
-        // \comodojo\Dispatcher\debug("Timeout: ".$time,"DEBUG","httprequest");
 
         return $this;
 
@@ -275,8 +274,6 @@ class Httprequest {
 
         }
         
-        // \comodojo\Dispatcher\debug("Using http version: ".$version,"DEBUG","http");
-
         return $this;
 
     }
@@ -293,8 +290,6 @@ class Httprequest {
         if ( empty($type) ) throw new HttpException("Conte Type cannot be null");
 
         $this->contentType = $type;
-
-        // \comodojo\Dispatcher\debug("Using content type: ".$type,"DEBUG","httprequest");
 
         return $this;
 
@@ -317,8 +312,6 @@ class Httprequest {
             )
         );
         
-        // \comodojo\Dispatcher\debug("Using port: ".$port,"DEBUG","httprequest");
-
         return $this;
 
     }
@@ -336,15 +329,11 @@ class Httprequest {
 
         if ( !in_array($method, $this->supported_http_methods) ) {
 
-            // \comodojo\Dispatcher\debug($method." is not currently supported", "ERROR", "httprequest");
-
             throw new HttpException("Unsupported HTTP method");
 
         }
 
         $this->method = $method;
-
-        // \comodojo\Dispatcher\debug("Using method: ".$method,"DEBUG","httprequest");
 
         return $this;
 
@@ -370,8 +359,6 @@ class Httprequest {
         if ( !is_null($user) AND !is_null($pass) ) {
 
             $this->proxy_auth = $user.':'.$pass;
-
-            // \comodojo\Dispatcher\debug("Using proxy: ".$user."@".$address,"DEBUG","httprequest");
 
         }
         else if ( !is_null($user) ) {
@@ -405,6 +392,12 @@ class Httprequest {
     public final function getReceivedHeaders() {
 
         return $this->receivedHeaders;
+
+    }
+
+    public final function getHttpStatusCode() {
+
+        return $this->receivedHttpStatus;
 
     }
 
@@ -565,7 +558,7 @@ class Httprequest {
                 curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT"); 
                 if ( !empty($data) ) {
                     curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
-                    array_push($this->header, "Content-Type: ".$this->contentType);
+                    array_push($this->headers, "Content-Type: ".$this->contentType);
                 }
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
                 break;
@@ -574,7 +567,7 @@ class Httprequest {
                 curl_setopt($this->ch, CURLOPT_POST, true);
                 if ( !empty($data) ) {
                     curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
-                    array_push($this->header, "Content-Type: ".$this->contentType);
+                    array_push($this->headers, "Content-Type: ".$this->contentType);
                 }
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
                 break;
@@ -660,8 +653,6 @@ class Httprequest {
 
         if ( !$this->ch ) {
 
-            // \comodojo\Dispatcher\debug("Cannot init data channel","ERROR","httprequest");
-
             throw new HttpException("Cannot init data channel");
 
         }
@@ -674,11 +665,11 @@ class Httprequest {
         
         if ( $request === false ) {
                 
-            // \comodojo\Dispatcher\debug("Curl request error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","httprequest");
-
             throw new HttpException(curl_error($this->ch), curl_errno($this->ch));
 
         }
+
+        $this->receivedHttpStatus = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 
         $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
 
@@ -686,7 +677,7 @@ class Httprequest {
 
         $body = substr($request, $header_size);
 
-        $this->receivedHeaders = $this->tokenize_headers($headers);
+        $this->receivedHeaders = self::tokenizeHeaders($headers);
 
         return $body;
 
@@ -708,25 +699,27 @@ class Httprequest {
         $received = file_get_contents($host, false, $this->ch);
         
         if ( $received === false ) {
-                
-            // \comodojo\Dispatcher\debug("Stream request error","ERROR","httprequest");
-            
+                            
             throw new HttpException("Cannot read stream socket");
 
         }
         
-        $this->receivedHeaders = $this->tokenize_headers(implode("\r\n", $http_response_header));
+        $this->receivedHeaders = self::tokenizeHeaders(implode("\r\n", $http_response_header));
+
+        list($version, $this->receivedHttpStatus, $msg) = explode(' ',$this->receivedHeaders[0], 3);
         
         return $received;
 
     }
 
-    private function tokenize_headers($headers) {
+    static private function tokenizeHeaders($headers) {
 
         $return = array();
 
-        foreach (explode("\r\n", $headers) as $header) {
-            
+        $headers_array = explode("\r\n", $headers);
+
+        foreach ( $headers_array as $header ) {
+
             if ( empty($header) ) continue;
 
             $header_components = explode(":", $header);
