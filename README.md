@@ -26,7 +26,7 @@ Main features:
 
 Library usage is trivial: first create an instance of Httprequest specifing remote host address, then use `get` or `send` method to start request. It's important to wrap code in a try/catch block to handle exceptions (if any).
 
-Constructor accept two parameters: remote host address (required) and a boolean value (optional) that, if false, will force lib to use streams instead of curl. 
+Constructor accepts two parameters: remote host address (required) and a boolean value (optional) that, if false, will force lib to use streams instead of curl. 
 
 - Using get:
 
