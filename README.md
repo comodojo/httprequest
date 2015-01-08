@@ -31,7 +31,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Using get:
 
     ```php
-    
     try {
 	
 	    // create an instance of Httprequest
@@ -59,7 +58,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Using send:
 
     ```php
-    
     $data = array('foo'=>'bar', 'baz'=>'boom');
     
     try {
@@ -82,12 +80,11 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 
 	```
 
-## Class setters (chainable)
+## Class setters (chainable methods)
 
 - Set destination port (default 80)
 
     ```php
-    
     $http->setPort(8080);
     
     ```
@@ -95,15 +92,13 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Set timeout (in secs)
 
     ```php
-    
-     $http->setTimeout(10);
+    $http->setTimeout(10);
     
     ```
     
 - Set a custom user agent (default to 'Comodojo-Httprequest')
 
     ```php
-    
     $http->setUserAgent("My-Custom-User-Agent");
     
     ```
@@ -111,7 +106,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Set HTTP version (1.0 or 1.1)
 
     ```php
-    
     $http->setHttpVersion("1.1");
     
     ```
@@ -119,7 +113,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Set content type (default to 'application/x-www-form-urlencoded' and used only with `send` method)
 
     ```php
-    
     $http->setContentType("multipart/form-data");
     
     ```
@@ -127,14 +120,12 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Set additional/custom headers:
 
     ```php
-    
     $http->setHeader("My-Header","foo");
     
     ```    
 - Set authentication:
 
     ```php
-    
     // NTLM
     $http->setAuth("NTLM", "myusername", "mypassword");
     
@@ -146,7 +137,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Set proxy:
 
     ```php
-    
     // No authentication
     $http->setProxy(proxy.example.org);
     
@@ -160,7 +150,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Get response headers:
 
     ```php
-    
     // After a request...
     
     $headers = $http->getReceivedHeaders();
@@ -170,7 +159,6 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 - Get HTTP received status code:
 
     ```php
-    
     // After a request...
     
     $code = $http->getHttpStatusCode();
@@ -181,30 +169,29 @@ Constructor accept two parameters: remote host address (required) and a boolean 
 
 The `reset` method helps resetting options and data channel; for example:
 
-    ```php
+```php
+try {
+
+    // create an instance of Httprequest
+    $http = new \Comodojo\Httprequest\Httprequest();
     
-    try {
+    // first request
+    $first_data = $http->setHost("www.example.com")->get();
+    
+    // channel reset
+    $http->reset();
+    
+    // second request
+    $second_data = $http->setHost("www.example2.com")->setHttpMethod("POST")->send(array("my"=>"data"));
+    
+} catch (\Comodojo\Exception\HttpException $he) {
+
+	/* handle http specific exception */
+
+} catch (\Exception $e) {
 	
-	    // create an instance of Httprequest
-        $http = new \Comodojo\Httprequest\Httprequest();
-        
-        // first request
-        $first_data = $http->setHost("www.example.com")->get();
-        
-        // channel reset
-        $http->reset();
-        
-        // second request
-        $second_data = $http->setHost("www.example2.com")->setHttpMethod("POST")->send(array("my"=>"data"));
-        
-	} catch (\Comodojo\Exception\HttpException $he) {
+	/* handle generic exception */
 
-		/* handle http specific exception */
+}
 
-	} catch (\Exception $e) {
-		
-		/* handle generic exception */
-
-	}
-
-	```
+```
