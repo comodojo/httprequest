@@ -6,9 +6,12 @@
     "keywords": [
         "comodojo",
         "http",
-        "request"
+        "request",
+        "proxy",
+        "ntlm",
+        "basic"
     ],
-    "homepage": "http://www.comodojo.org",
+    "homepage": "http://comodojo.org",
      "support": {
         "issues": "https://github.com/comodojo/httprequest/issues"
     },

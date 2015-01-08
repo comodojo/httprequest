@@ -32,7 +32,7 @@ class Httprequest {
      *
      * @var url
      */
-    private $address = NULL;
+    private $address = null;
     
     /**
      * Remote host port
@@ -76,21 +76,21 @@ class Httprequest {
      *
      * @var string
      */
-    private $user = NULL;
+    private $user = null;
     
     /**
      * Remote host auth password
      *
      * @var string
      */
-    private $pass = NULL;
+    private $pass = null;
 
     /**
      * Request user agent
      * 
      * @var string
      */
-    private $userAgent = 'Comodojo-Dispatcher';
+    private $userAgent = 'Comodojo-Httprequest';
     
     /**
      * Content type
@@ -160,32 +160,79 @@ class Httprequest {
      */
     private $ch = false;
     
-    public final function __construct($address, $curl=true) {
+    /**
+     * Class constructor
+     *
+     * @param   string  $address Remote host address
+     * @param   bool    $curl    Use curl (true) or stream (false)
+     *
+     * @return  Object  $this
+     */
+    final public function __construct($address=false, $curl=true) {
 
-        $curl = filter_var($curl, FILTER_VALIDATE_BOOLEAN);
+        if ( !empty($address) ) {
+            
+            try {
+                
+                $this->setHost($address);
+                
+            } catch (HttpException $he) {
+                
+                throw $he;
+                
+            }
+            
+        }
+        
+        $this->setCurl($curl);
+        
+    }
 
+    /**
+     * Class destructor
+     *
+     */
+    final public function __destruct() {
+
+        if ( $this->ch !== false ) $this->close_transport();
+
+    }
+
+    /**
+     * Set remote host address
+     *
+     * @param   string  $address Remote host address
+     *
+     * @return  Object  $this
+     */
+    final public function setHost($address) {
+        
         $url = filter_var($address, FILTER_VALIDATE_URL);
 
         if ( $url === false ) throw new HttpException("Invalid remote address");
         
         $this->address = $address;
-
-        if ( !function_exists("curl_init") OR !$curl ) {
-            
-            $this->curl = false;
-            
-        } else {
-
-            $this->curl = true;
-
-        }
-
+        
+        return $this;
+        
     }
-
-    public final function __destruct() {
-
-        if ( $this->ch !== false ) $this->close_transport();
-
+    
+    /**
+     * Force lib to use curl (default if available) or stream
+     *
+     * @param   bool    $mode    Use curl (true) or stream (false)
+     *
+     * @return  Object  $this
+     */
+    final public function setCurl($mode=true) {
+        
+        $curl = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
+        
+        if ( !function_exists("curl_init") OR !$curl ) $this->curl = false;
+        else $this->curl = true;
+        
+        return $this;
+        
     }
 
     /**
@@ -197,7 +244,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setAuth($method, $user, $pass=NULL) {
+    final public function setAuth($method, $user, $pass=NULL) {
 
         $method = strtoupper($method);
 
@@ -227,7 +274,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setUserAgent($ua) {
+    final public function setUserAgent($ua) {
 
         if ( empty($ua) ) throw new HttpException("Useragent cannot be null");
 
@@ -244,7 +291,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setTimeout($sec) {
+    final public function setTimeout($sec) {
 
         $time = filter_var($sec, FILTER_VALIDATE_INT);
 
@@ -261,7 +308,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setHttpVersion($ver) {
+    final public function setHttpVersion($ver) {
 
         if ( !in_array($ver, array("1.0","1.1")) ) {
             
@@ -285,7 +332,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setContentType($type) {
+    final public function setContentType($type) {
 
         if ( empty($type) ) throw new HttpException("Conte Type cannot be null");
 
@@ -302,7 +349,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setPort($port) {
+    final public function setPort($port) {
 
         $this->port = filter_var($port, FILTER_VALIDATE_INT, array(
             "options" => array(
@@ -323,7 +370,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setHttpMethod($method) {
+    final public function setHttpMethod($method) {
 
         $method = strtoupper($method);
 
@@ -348,7 +395,7 @@ class Httprequest {
      *
      * @return  Object  $this
      */
-    public final function setProxy($address, $user=null, $pass=null) {
+    final public function setProxy($address, $user=null, $pass=null) {
 
         $proxy = filter_var($address, FILTER_VALIDATE_URL);
 
@@ -378,9 +425,9 @@ class Httprequest {
      * @param   string  $header     Header name
      * @param   string  $value      Header content (optional)
      *
-     * @return  ObjectRequest   $this
+     * @return  Object   $this
      */
-    public final function setHeader($header, $value=NULL) {
+    final public function setHeader($header, $value=NULL) {
 
         $this->headers[$header] = $value;
 
@@ -388,14 +435,23 @@ class Httprequest {
 
     }
 
-
-    public final function getReceivedHeaders() {
+    /**
+     * Get received headers
+     *
+     * @return  array
+     */
+    final public function getReceivedHeaders() {
 
         return $this->receivedHeaders;
 
     }
 
-    public final function getHttpStatusCode() {
+    /**
+     * Get received headers
+     *
+     * @return  string
+     */
+    final public function getHttpStatusCode() {
 
         return $this->receivedHttpStatus;
 
@@ -404,7 +460,7 @@ class Httprequest {
     /**
      * Init transport and send data to the remote host.
      * 
-     * @return  string  Received Data
+     * @return  string
      */
     public function send($data = NULL) {
         
@@ -427,7 +483,7 @@ class Httprequest {
     /**
      * Init transport and get remote content
      * 
-     * @return  string  Received Data
+     * @return  string
      */
     public function get() {
         
@@ -451,9 +507,9 @@ class Httprequest {
      * Reset the data channel for new request
      * 
      */
-    public final function reset() {
+    final public function reset() {
 
-        $this->address = NULL;
+        $this->address = null;
 
         $this->port = 80;
 
@@ -465,11 +521,11 @@ class Httprequest {
 
         $this->authenticationMethod = false;
 
-        $this->user = NULL;
+        $this->user = null;
 
-        $this->pass = NULL;
+        $this->pass = null;
 
-        $this->userAgent = 'Comodojo-Dispatcher';
+        $this->userAgent = 'Comodojo-Httprequest';
 
         $this->contentType = 'application/x-www-form-urlencoded';
 
@@ -480,13 +536,15 @@ class Httprequest {
             'Accept-Charset'    =>  'UTF-8;q=0.7,*;q=0.7'
         );
 
-        $this->proxy = NULL;
+        $this->proxy = null;
 
-        $this->proxy_auth = NULL;
+        $this->proxy_auth = null;
 
         $this->receivedHeaders = array();
 
-        $this->buffer = 4096;
+        $this->receivedHttpStatus = null;
+        
+        if ( $this->ch !== false ) $this->close_transport();
 
     }
     
@@ -640,12 +698,12 @@ class Httprequest {
 
         if ( !empty($data) ) {
 
-            //$data = urlencode($data);
+            $data_query = http_build_query($data);
 
             array_push($stream_options['http']['header'], 'Content-Type: '.$this->contentType);
-            array_push($stream_options['http']['header'], 'Content-Length: '.strlen($data));
+            array_push($stream_options['http']['header'], 'Content-Length: '.strlen($data_query));
 
-            $stream_options['http']['content'] = $data;
+            $stream_options['http']['content'] = $data_query;
             
         }
 
