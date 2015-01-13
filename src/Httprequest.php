@@ -167,6 +167,8 @@ class Httprequest {
      * @param   bool    $curl    Use curl (true) or stream (false)
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function __construct($address=false, $curl=true) {
 
@@ -204,6 +206,8 @@ class Httprequest {
      * @param   string  $address Remote host address
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function setHost($address) {
         
@@ -243,6 +247,8 @@ class Httprequest {
      * @param   string  $pass   User password
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function setAuth($method, $user, $pass=NULL) {
 
@@ -273,6 +279,8 @@ class Httprequest {
      * @param   string  $ua     User Agent
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function setUserAgent($ua) {
 
@@ -331,6 +339,8 @@ class Httprequest {
      * @param   string  $type
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function setContentType($type) {
 
@@ -369,6 +379,8 @@ class Httprequest {
      * @param   string  $mehod  HTTP METHOD
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function setHttpMethod($method) {
 
@@ -394,6 +406,8 @@ class Httprequest {
      * @param   string  $pass       (optional) User password for proxy auth
      *
      * @return  Object  $this
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     final public function setProxy($address, $user=null, $pass=null) {
 
@@ -461,6 +475,8 @@ class Httprequest {
      * Init transport and send data to the remote host.
      * 
      * @return  string
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     public function send($data = NULL) {
         
@@ -484,6 +500,8 @@ class Httprequest {
      * Init transport and get remote content
      * 
      * @return  string
+     * 
+     * @throws \Comodojo\Exception\HttpException
      */
     public function get() {
         
