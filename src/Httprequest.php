@@ -125,7 +125,7 @@ class Httprequest {
      *
      * @var array
      */
-    private $supported_auth_methods = array("BASIC","NTLM");
+    private $supported_auth_methods = array("BASIC","DIGEST","SPNEGO","NTLM");
 
     /**
      * Allowed HTTP authentication
@@ -609,6 +609,16 @@ class Httprequest {
                 curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
                 break;
 
+            case 'DIGEST':
+                curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+                curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+                break;
+
+            case 'SPNEGO':
+                curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
+                curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+                break;
+
             case 'NTLM':
                 curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
                 curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
@@ -682,7 +692,7 @@ class Httprequest {
 
     private function init_stream($data) {
 
-        if ($this->authenticationMethod == 'NTLM') throw new HttpException("NTLM auth with streams is not supported");
+        if ( in_array( $this->authenticationMethod, array("DIGEST","SPNEGO","NTLM") ) ) throw new HttpException("Selected auth method not available in stream mode");
 
         $stream_options = array(
             'http'  =>  array(
