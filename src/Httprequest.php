@@ -107,7 +107,7 @@ class Httprequest {
     private $headers = array(
         'Accept'            =>  'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language'   =>  'en-us,en;q=0.5',
-        'Accept-Encoding'   =>  'deflate',
+        'Accept-Encoding'   =>  'gzip,deflate',
         'Accept-Charset'    =>  'UTF-8;q=0.7,*;q=0.7'
     );
 
@@ -478,7 +478,7 @@ class Httprequest {
      * 
      * @throws \Comodojo\Exception\HttpException
      */
-    public function send($data = NULL) {
+    public function send($data = null) {
         
         try {
         
@@ -643,8 +643,8 @@ class Httprequest {
             case 'PUT':
                 curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT"); 
                 if ( !empty($data) ) {
-                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
-                    array_push($this->headers, "Content-Type: ".$this->contentType);
+                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
+                    $this->headers["Content-Type"] = $this->contentType;
                 }
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
                 break;
@@ -652,8 +652,8 @@ class Httprequest {
             case 'POST':
                 curl_setopt($this->ch, CURLOPT_POST, true);
                 if ( !empty($data) ) {
-                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
-                    array_push($this->headers, "Content-Type: ".$this->contentType);
+                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
+                    $this->headers["Content-Type"] = $this->contentType;
                 }
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
                 break;
@@ -687,6 +687,9 @@ class Httprequest {
         curl_setopt($this->ch, CURLOPT_USERAGENT,       $this->userAgent);
         curl_setopt($this->ch, CURLOPT_HTTPHEADER,      $headers);
         curl_setopt($this->ch, CURLOPT_HEADER,          1);
+        curl_setopt($this->ch, CURLOPT_ENCODING ,       "");
+
+        //curl_setopt($this->ch, CURLOPT_VERBOSE, true);
 
     }
 
@@ -726,7 +729,7 @@ class Httprequest {
 
         if ( !empty($data) ) {
 
-            $data_query = http_build_query($data);
+            $data_query = ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data;
 
             array_push($stream_options['http']['header'], 'Content-Type: '.$this->contentType);
             array_push($stream_options['http']['header'], 'Content-Length: '.strlen($data_query));
@@ -792,9 +795,17 @@ class Httprequest {
         
         $this->receivedHeaders = self::tokenizeHeaders(implode("\r\n", $http_response_header));
 
+        $content_encoding = array_key_exists('Content-Encoding', $this->receivedHeaders);
+
         list($version, $this->receivedHttpStatus, $msg) = explode(' ',$this->receivedHeaders[0], 3);
-        
-        return $received;
+
+        if ( $content_encoding === true AND strpos($this->receivedHeaders['Content-Encoding'], 'gzip') !== false ) {
+
+            return gzinflate( substr($received,10,-8) );
+
+        }
+
+        else return $received;
 
     }
 
