@@ -1,10 +1,12 @@
 ## comodojo/httprequest
 
-HTTP request library for comodojo.
+[![Build Status](https://api.travis-ci.org/comodojo/httprequest.png)](http://travis-ci.org/comodojo/httprequest) [![Latest Stable Version](https://poser.pugx.org/comodojo/httprequest/v/stable)](https://packagist.org/packages/comodojo/httprequest) [![Total Downloads](https://poser.pugx.org/comodojo/httprequest/downloads)](https://packagist.org/packages/comodojo/httprequest) [![Latest Unstable Version](https://poser.pugx.org/comodojo/httprequest/v/unstable)](https://packagist.org/packages/comodojo/httprequest) [![License](https://poser.pugx.org/comodojo/httprequest/license)](https://packagist.org/packages/comodojo/httprequest)
+
+HTTP request library
 
 Main features:
 
-- BASIC or NTLM (requires [php curl library](http://php.net/manual/en/book.curl.php)) authentication support
+- BASIC, NTLM, DIGEST and SPNEGO auth (requires [php curl library](http://php.net/manual/en/book.curl.php)) authentication support
 - proxy support
 - allowed http methods: GET, POST, PUT, DELETE
 - CURL or stream working mode
@@ -16,7 +18,7 @@ Main features:
 
 	Install [composer](https://getcomposer.org/), then:
 
-	`` composer require comodojo/httprequest 1.1.* ``
+	`` composer require comodojo/httprequest 1.2.* ``
 
 -	Manually
 

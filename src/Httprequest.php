@@ -1,28 +1,24 @@
 <?php namespace Comodojo\Httprequest;
 
 use \Comodojo\Exception\HttpException;
+use League\Url\Url;
 
 /**
- * HTTP requests library for comodojo   
+ * HTTP requests library   
  * 
  * @package     Comodojo Spare Parts
  * @author      Marco Giovinazzi <info@comodojo.org>
- * @license     GPL-3.0+
+ * @license     MIT
  *
  * LICENSE:
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
  
 class Httprequest {
@@ -159,6 +155,8 @@ class Httprequest {
      * @var resource
      */
     private $ch = false;
+
+    private $stream_get_data = null;
     
     /**
      * Class constructor
@@ -250,7 +248,7 @@ class Httprequest {
      * 
      * @throws \Comodojo\Exception\HttpException
      */
-    final public function setAuth($method, $user, $pass=NULL) {
+    final public function setAuth($method, $user, $pass=null) {
 
         $method = strtoupper($method);
 
@@ -259,6 +257,8 @@ class Httprequest {
             throw new HttpException("Unsupported authentication method");
 
         }
+
+        $this->authenticationMethod = $method;
 
         if ( empty($user) ) {
 
@@ -561,6 +561,8 @@ class Httprequest {
         $this->receivedHeaders = array();
 
         $this->receivedHttpStatus = null;
+
+        $this->stream_get_data = null;
         
         if ( $this->ch !== false ) $this->close_transport();
 
@@ -606,22 +608,22 @@ class Httprequest {
 
             case 'BASIC':
                 curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-                curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+                curl_setopt($this->ch, CURLOPT_USERPWD, $this->user.":".$this->pass); 
                 break;
 
             case 'DIGEST':
                 curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-                curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+                curl_setopt($this->ch, CURLOPT_USERPWD, $this->user.":".$this->pass); 
                 break;
 
             case 'SPNEGO':
                 curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
-                curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+                curl_setopt($this->ch, CURLOPT_USERPWD, $this->user.":".$this->pass); 
                 break;
 
             case 'NTLM':
                 curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
-                curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+                curl_setopt($this->ch, CURLOPT_USERPWD, $this->user.":".$this->pass); 
                 break;
 
         }
@@ -637,7 +639,10 @@ class Httprequest {
         switch ($this->method) {
             
             case 'GET':
-                curl_setopt($this->ch, CURLOPT_URL, $this->address);
+
+                if ( empty($data) ) curl_setopt($this->ch, CURLOPT_URL, $this->address);
+                else curl_setopt($this->ch, CURLOPT_URL, $this->address . "?" . ( ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data ) );
+
                 break;
             
             case 'PUT':
@@ -717,7 +722,7 @@ class Httprequest {
 
         }
 
-        if ($this->authenticationMethod == "BASIC") array_push($stream_options['http']['header'], 'Authorization: Basic  '.base64_encode($this->userName.":".$this->userPass));
+        if ($this->authenticationMethod == "BASIC") array_push($stream_options['http']['header'], 'Authorization: Basic  '.base64_encode($this->user.":".$this->pass));
         
         foreach ($this->getHeaders() as $header => $value) {
 
@@ -731,10 +736,19 @@ class Httprequest {
 
             $data_query = ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data;
 
-            array_push($stream_options['http']['header'], 'Content-Type: '.$this->contentType);
-            array_push($stream_options['http']['header'], 'Content-Length: '.strlen($data_query));
+            if ( $this->method == "GET" ) {
 
-            $stream_options['http']['content'] = $data_query;
+                $this->stream_get_data = $data_query;
+
+            } else {
+
+                array_push($stream_options['http']['header'], 'Content-Type: '.$this->contentType);
+
+                array_push($stream_options['http']['header'], 'Content-Length: '.strlen($data_query));
+
+                $stream_options['http']['content'] = $data_query;
+
+            }
             
         }
 
@@ -774,18 +788,35 @@ class Httprequest {
 
     private function send_stream() {
 
-        if ( $this->port == 80 ) {
+        $url = Url::createFromUrl($this->address);
 
-            $host = $this->address;
+        if ( $this->port != 80 ) $url->setPort($this->port);
 
+        if ( !is_null($this->stream_get_data) ) $url->setQuery($this->stream_get_data);
+
+        $host = $url;
+
+        set_error_handler( 
+
+            function($severity, $message, $file, $line) {
+
+                throw new HttpException($message);
+
+            }
+
+        );
+
+        try {
+        
+            $received = file_get_contents($host, false, $this->ch);
+
+        } catch (HttpException $he) {
+
+            throw $he;
+            
         }
-        else {
 
-            $host = substr($this->address, -1) == "/" ? substr($this->address, 0, -1).':'.$this->port : $this->address.':'.$this->port;
-
-        }
-
-        $received = file_get_contents($host, false, $this->ch);
+        restore_error_handler();
         
         if ( $received === false ) {
                             
