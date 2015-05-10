@@ -70,8 +70,6 @@ class Options extends \PHPUnit_Framework_TestCase {
 
         $result = json_decode($body,true);
 
-        var_export($result);
-
         $this->assertArrayHasKey("Content-Type", $result['headers']);
 
         $this->assertSame("text/xml", $result['headers']['Content-Type']);
