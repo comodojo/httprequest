@@ -641,31 +641,57 @@ class Httprequest {
             case 'GET':
 
                 if ( empty($data) ) curl_setopt($this->ch, CURLOPT_URL, $this->address);
+
                 else curl_setopt($this->ch, CURLOPT_URL, $this->address . "?" . ( ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data ) );
 
                 break;
             
             case 'PUT':
+
                 curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT"); 
+
                 if ( !empty($data) ) {
+
                     curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
-                    $this->headers["Content-Type"] = $this->contentType;
+
+                    $this->setHeader('Content-Type',$this->contentType);
+
                 }
+
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
+
                 break;
             
             case 'POST':
+
                 curl_setopt($this->ch, CURLOPT_POST, true);
+
                 if ( !empty($data) ) {
+
                     curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
-                    $this->headers["Content-Type"] = $this->contentType;
+
+                    $this->setHeader('Content-Type',$this->contentType);
+
                 }
+
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
+
                 break;
             
             case 'DELETE':
+
                 curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+
+                if ( !empty($data) ) {
+
+                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
+
+                    $this->setHeader('Content-Type',$this->contentType);
+
+                }
+                
                 curl_setopt($this->ch, CURLOPT_URL, $this->address);
+
                 break;
 
         }

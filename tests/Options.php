@@ -64,19 +64,26 @@ class Options extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public function testContentType() {
+
+        $body = $this->http->setHost("http://httpbin.org/post")->setHttpMethod("POST")->setContentType("text/xml")->send("<method>test</method>");
+
+        $result = json_decode($body,true);
+
+        var_export($result);
+
+        $this->assertArrayHasKey("Content-Type", $result['headers']);
+
+        $this->assertSame("text/xml", $result['headers']['Content-Type']);
+
+    }
+
     /**
      * @expectedException        Comodojo\Exception\HttpException
      */
     public function testTimeoutException() {
     
         $body = $this->http->setHost("http://httpbin.org/delay/10")->setTimeout(2)->get();
-        
-        //var_export($body);
-        //$result = json_decode($body,true);
-
-        //$this->assertArrayHasKey("Comodojo-Header", $result['headers']);
-
-        //$this->assertSame("42", $result['headers']['Comodojo-Header']);
 
     }
 
