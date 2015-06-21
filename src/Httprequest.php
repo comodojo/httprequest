@@ -1,13 +1,13 @@
 <?php namespace Comodojo\Httprequest;
 
 use \Comodojo\Exception\HttpException;
-use League\Url\Url;
+use \League\Url\Url;
 
 /**
  * HTTP requests library   
  * 
  * @package     Comodojo Spare Parts
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     MIT
  *
  * LICENSE:
