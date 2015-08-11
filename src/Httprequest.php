@@ -112,23 +112,23 @@ class Httprequest {
      *
      * @var string
      */
-    private $proxy = NULL;
+    private $proxy = null;
 
-    private $proxy_auth = NULL;
+    private $proxy_auth = null;
 
     /**
      * Allowed HTTP methods
      *
      * @var array
      */
-    private $supported_auth_methods = array("BASIC","DIGEST","SPNEGO","NTLM");
+    private $supported_auth_methods = array("BASIC", "DIGEST", "SPNEGO", "NTLM");
 
     /**
      * Allowed HTTP authentication
      *
      * @var array
      */
-    private $supported_http_methods = array("GET","POST","PUT","DELETE");
+    private $supported_http_methods = array("GET", "POST", "PUT", "DELETE");
 
     /**
      * Are we using curl?
@@ -166,7 +166,7 @@ class Httprequest {
      * 
      * @throws \Comodojo\Exception\HttpException
      */
-    final public function __construct($address=false, $curl=true) {
+    final public function __construct($address = false, $curl = true) {
 
         if ( !empty($address) ) {
             
@@ -224,7 +224,7 @@ class Httprequest {
      *
      * @return  \Comodojo\Httprequest\Httprequest
      */
-    final public function setCurl($mode=true) {
+    final public function setCurl($mode = true) {
         
         $curl = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
         
@@ -246,7 +246,7 @@ class Httprequest {
      * 
      * @throws \Comodojo\Exception\HttpException
      */
-    final public function setAuth($method, $user, $pass=null) {
+    final public function setAuth($method, $user, $pass = null) {
 
         $method = strtoupper($method);
 
@@ -316,12 +316,11 @@ class Httprequest {
      */
     final public function setHttpVersion($ver) {
 
-        if ( !in_array($ver, array("1.0","1.1")) ) {
+        if ( !in_array($ver, array("1.0", "1.1")) ) {
             
             $this->httpVersion = "NONE";
         
-        }
-        else {
+        } else {
 
             $this->httpVersion = $ver;
 
@@ -407,7 +406,7 @@ class Httprequest {
      * 
      * @throws \Comodojo\Exception\HttpException
      */
-    final public function setProxy($address, $user=null, $pass=null) {
+    final public function setProxy($address, $user = null, $pass = null) {
 
         $proxy = filter_var($address, FILTER_VALIDATE_URL);
 
@@ -419,13 +418,11 @@ class Httprequest {
 
             $this->proxy_auth = $user.':'.$pass;
 
-        }
-        else if ( !is_null($user) ) {
+        } else if ( !is_null($user) ) {
 
             $this->proxy_auth = $user;
 
-        }
-        else $this->proxy_auth = NULL; 
+        } else $this->proxy_auth = NULL; 
 
         return $this;
 
@@ -439,7 +436,7 @@ class Httprequest {
      *
      * @return  \Comodojo\Httprequest\Httprequest
      */
-    final public function setHeader($header, $value=NULL) {
+    final public function setHeader($header, $value = NULL) {
 
         $this->headers[$header] = $value;
 
@@ -487,7 +484,7 @@ class Httprequest {
     /**
      * Get received headers
      *
-     * @return  string
+     * @return  integer
      */
     final public function getHttpStatusCode() {
 
@@ -544,13 +541,13 @@ class Httprequest {
 
             if ( $this->curl ) {
 
-                $this->init_curl(NULL);
+                $this->init_curl(null);
 
                 $received = $this->send_curl();
 
             } else {
 
-                $this->init_stream(NULL);
+                $this->init_stream(null);
 
                 $received = $this->send_stream();
 
@@ -642,23 +639,23 @@ class Httprequest {
             
         if ( $this->ch === false ) throw new HttpException("Cannot init data channel");
 
-        switch ($this->httpVersion) {
+        switch ( $this->httpVersion ) {
 
             case '1.0':
-                curl_setopt($this->ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_0);
+                curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
                 break;
 
             case '1.1':
-                curl_setopt($this->ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_1);
+                curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
                 break;
 
             default:
-                curl_setopt($this->ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_NONE);
+                curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_NONE);
                 break;
 
         }
 
-        switch ($this->authenticationMethod) {
+        switch ( $this->authenticationMethod ) {
 
             case 'BASIC':
                 curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
@@ -690,13 +687,13 @@ class Httprequest {
 
         }
 
-        switch ($this->method) {
+        switch ( $this->method ) {
             
             case 'GET':
 
                 if ( empty($data) ) curl_setopt($this->ch, CURLOPT_URL, $this->address);
 
-                else curl_setopt($this->ch, CURLOPT_URL, $this->address . "?" . ( ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data ) );
+                else curl_setopt($this->ch, CURLOPT_URL, $this->address."?".((is_array($data) OR is_object($data)) ? http_build_query($data) : $data));
 
                 break;
             
@@ -706,9 +703,9 @@ class Httprequest {
 
                 if ( !empty($data) ) {
 
-                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
+                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, (is_array($data) OR is_object($data)) ? http_build_query($data) : $data);
 
-                    $this->setHeader('Content-Type',$this->contentType);
+                    $this->setHeader('Content-Type', $this->contentType);
 
                 }
 
@@ -722,9 +719,9 @@ class Httprequest {
 
                 if ( !empty($data) ) {
 
-                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
+                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, (is_array($data) OR is_object($data)) ? http_build_query($data) : $data);
 
-                    $this->setHeader('Content-Type',$this->contentType);
+                    $this->setHeader('Content-Type', $this->contentType);
 
                 }
 
@@ -738,9 +735,9 @@ class Httprequest {
 
                 if ( !empty($data) ) {
 
-                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data);
+                    curl_setopt($this->ch, CURLOPT_POSTFIELDS, (is_array($data) OR is_object($data)) ? http_build_query($data) : $data);
 
-                    $this->setHeader('Content-Type',$this->contentType);
+                    $this->setHeader('Content-Type', $this->contentType);
 
                 }
                 
@@ -754,7 +751,7 @@ class Httprequest {
 
             $headers = array();
 
-            foreach ($this->getHeaders() as $header => $value) {
+            foreach ( $this->getHeaders() as $header => $value ) {
                 
                 if ( is_null($value) ) array_push($headers, $header);
             
@@ -762,17 +759,16 @@ class Httprequest {
 
             }
 
-        }
-        else $headers = array();
+        } else $headers = array();
 
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER,  1);
-        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION,  1);
-        curl_setopt($this->ch, CURLOPT_TIMEOUT,         $this->timeout);
-        curl_setopt($this->ch, CURLOPT_PORT,            $this->port);
-        curl_setopt($this->ch, CURLOPT_USERAGENT,       $this->userAgent);
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER,      $headers);
-        curl_setopt($this->ch, CURLOPT_HEADER,          1);
-        curl_setopt($this->ch, CURLOPT_ENCODING ,       "");
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($this->ch, CURLOPT_PORT, $this->port);
+        curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
+        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($this->ch, CURLOPT_HEADER, 1);
+        curl_setopt($this->ch, CURLOPT_ENCODING, "");
 
         //curl_setopt($this->ch, CURLOPT_VERBOSE, true);
 
@@ -787,7 +783,7 @@ class Httprequest {
      */
     private function init_stream($data) {
 
-        if ( in_array( $this->authenticationMethod, array("DIGEST","SPNEGO","NTLM") ) ) throw new HttpException("Selected auth method not available in stream mode");
+        if ( in_array($this->authenticationMethod, array("DIGEST", "SPNEGO", "NTLM")) ) throw new HttpException("Selected auth method not available in stream mode");
 
         $stream_options = array(
             'http'  =>  array(
@@ -809,9 +805,9 @@ class Httprequest {
 
         }
 
-        if ($this->authenticationMethod == "BASIC") array_push($stream_options['http']['header'], 'Authorization: Basic  '.base64_encode($this->user.":".$this->pass));
+        if ( $this->authenticationMethod == "BASIC" ) array_push($stream_options['http']['header'], 'Authorization: Basic  '.base64_encode($this->user.":".$this->pass));
         
-        foreach ($this->getHeaders() as $header => $value) {
+        foreach ( $this->getHeaders() as $header => $value ) {
 
             if ( is_null($value) ) array_push($stream_options['http']['header'], $header);
             
@@ -821,7 +817,7 @@ class Httprequest {
 
         if ( !empty($data) ) {
 
-            $data_query = ( is_array($data) OR is_object($data) ) ? http_build_query($data) : $data;
+            $data_query = (is_array($data) OR is_object($data)) ? http_build_query($data) : $data;
 
             if ( $this->method == "GET" ) {
 
@@ -929,15 +925,13 @@ class Httprequest {
 
         $content_encoding = array_key_exists('Content-Encoding', $this->receivedHeaders);
 
-        list($version, $this->receivedHttpStatus, $msg) = explode(' ',$this->receivedHeaders[0], 3);
+        list($version, $this->receivedHttpStatus, $msg) = explode(' ', $this->receivedHeaders[0], 3);
 
         if ( $content_encoding === true AND strpos($this->receivedHeaders['Content-Encoding'], 'gzip') !== false ) {
 
-            return gzinflate( substr($received,10,-8) );
+            return gzinflate(substr($received, 10, -8));
 
-        }
-
-        else return $received;
+        } else return $received;
 
     }
 
@@ -975,7 +969,7 @@ class Httprequest {
      */
     private function close_transport() {
 
-        if ($this->curl) {
+        if ( $this->curl ) {
 
             curl_close($this->ch);
 
