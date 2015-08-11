@@ -1,6 +1,6 @@
 ## comodojo/httprequest
 
-[![Build Status](https://api.travis-ci.org/comodojo/httprequest.png)](http://travis-ci.org/comodojo/httprequest) [![Latest Stable Version](https://poser.pugx.org/comodojo/httprequest/v/stable)](https://packagist.org/packages/comodojo/httprequest) [![Total Downloads](https://poser.pugx.org/comodojo/httprequest/downloads)](https://packagist.org/packages/comodojo/httprequest) [![Latest Unstable Version](https://poser.pugx.org/comodojo/httprequest/v/unstable)](https://packagist.org/packages/comodojo/httprequest) [![License](https://poser.pugx.org/comodojo/httprequest/license)](https://packagist.org/packages/comodojo/httprequest)
+[![Build Status](https://api.travis-ci.org/comodojo/httprequest.png)](http://travis-ci.org/comodojo/httprequest) [![Latest Stable Version](https://poser.pugx.org/comodojo/httprequest/v/stable)](https://packagist.org/packages/comodojo/httprequest) [![Total Downloads](https://poser.pugx.org/comodojo/httprequest/downloads)](https://packagist.org/packages/comodojo/httprequest) [![Latest Unstable Version](https://poser.pugx.org/comodojo/httprequest/v/unstable)](https://packagist.org/packages/comodojo/httprequest) [![License](https://poser.pugx.org/comodojo/httprequest/license)](https://packagist.org/packages/comodojo/httprequest) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/comodojo/httprequest/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/comodojo/httprequest/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/comodojo/httprequest/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/comodojo/httprequest/?branch=master)
 
 HTTP request library
 
@@ -14,15 +14,9 @@ Main features:
 
 ## Installation
 
-- Using Composer
+Install [composer](https://getcomposer.org/), then:
 
-	Install [composer](https://getcomposer.org/), then:
-
-	`` composer require comodojo/httprequest 1.2.* ``
-
--	Manually
-
-	Download zipball from GitHub, extract it, include `src/Httprequest.php` and `src/Exception/HttpException.php` in your project.
+`` composer require comodojo/httprequest 1.2.* ``
 
 ## Basic usage
 

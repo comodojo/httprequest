@@ -163,8 +163,6 @@ class Httprequest {
      *
      * @param   string  $address Remote host address
      * @param   bool    $curl    Use curl (true) or stream (false)
-     *
-     * @return  Object  $this
      * 
      * @throws \Comodojo\Exception\HttpException
      */
@@ -203,9 +201,9 @@ class Httprequest {
      *
      * @param   string  $address Remote host address
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      * 
-     * @throws \Comodojo\Exception\HttpException
+     * @throws  \Comodojo\Exception\HttpException
      */
     final public function setHost($address) {
         
@@ -224,7 +222,7 @@ class Httprequest {
      *
      * @param   bool    $mode    Use curl (true) or stream (false)
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      */
     final public function setCurl($mode=true) {
         
@@ -244,7 +242,7 @@ class Httprequest {
      * @param   string  $user   Username to use
      * @param   string  $pass   User password
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      * 
      * @throws \Comodojo\Exception\HttpException
      */
@@ -278,7 +276,7 @@ class Httprequest {
      *
      * @param   string  $ua     User Agent
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      * 
      * @throws \Comodojo\Exception\HttpException
      */
@@ -297,7 +295,7 @@ class Httprequest {
      *
      * @param   int $sec    Timeout to wait for (in second)
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      */
     final public function setTimeout($sec) {
 
@@ -314,7 +312,7 @@ class Httprequest {
      *
      * @param   string  $ver    1.0 or 1.1
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      */
     final public function setHttpVersion($ver) {
 
@@ -338,9 +336,9 @@ class Httprequest {
      *
      * @param   string  $type
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      * 
-     * @throws \Comodojo\Exception\HttpException
+     * @throws  \Comodojo\Exception\HttpException
      */
     final public function setContentType($type) {
 
@@ -357,7 +355,7 @@ class Httprequest {
      *
      * @param   integer $port   TCP port (default 80)
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      */
     final public function setPort($port) {
 
@@ -378,7 +376,7 @@ class Httprequest {
      *
      * @param   string  $mehod  HTTP METHOD
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      * 
      * @throws \Comodojo\Exception\HttpException
      */
@@ -405,7 +403,7 @@ class Httprequest {
      * @param   string  $user       (optional) User name for proy auth
      * @param   string  $pass       (optional) User password for proxy auth
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Httprequest\Httprequest
      * 
      * @throws \Comodojo\Exception\HttpException
      */
@@ -439,13 +437,39 @@ class Httprequest {
      * @param   string  $header     Header name
      * @param   string  $value      Header content (optional)
      *
-     * @return  Object   $this
+     * @return  \Comodojo\Httprequest\Httprequest
      */
     final public function setHeader($header, $value=NULL) {
 
         $this->headers[$header] = $value;
 
         return $this;
+
+    }
+
+    /**
+     * Unset header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  \Comodojo\Httprequest\Httprequest
+     */
+    final public function unsetHeader($header) {
+
+        if ( array_key_exists($header, $this->headers) ) unset($this->headers[$header]);
+
+        return $this;
+
+    }
+
+    /**
+     * Get the whole headers array
+     *
+     * @return  array
+     */
+    final public function getHeaders() {
+
+        return $this->headers;
 
     }
 
@@ -568,12 +592,14 @@ class Httprequest {
 
     }
     
-    private function getHeaders() {
-
-        return $this->headers;
-
-    }
-
+    /**
+     * Parse a single header
+     *
+     * @param   string  $header
+     * @param   string  $value
+     * 
+     * @return  string
+     */
     private function parseHeader($header, $value) {
 
         if ( is_null($value) ) return $header;
@@ -582,6 +608,13 @@ class Httprequest {
 
     }
 
+    /**
+     * Init the CURL channel
+     *
+     * @param   string  $data
+     * 
+     * @throws  \Comodojo\Exception\HttpException
+     */
     private function init_curl($data) {
 
         $this->ch = curl_init();
@@ -724,6 +757,13 @@ class Httprequest {
 
     }
 
+    /**
+     * Init the STREAM channel
+     *
+     * @param   string  $data
+     * 
+     * @throws  \Comodojo\Exception\HttpException
+     */
     private function init_stream($data) {
 
         if ( in_array( $this->authenticationMethod, array("DIGEST","SPNEGO","NTLM") ) ) throw new HttpException("Selected auth method not available in stream mode");
@@ -788,6 +828,13 @@ class Httprequest {
 
     }
 
+    /**
+     * Send data via CURL
+     *
+     * @return  string
+     * 
+     * @throws  \Comodojo\Exception\HttpException
+     */
     private function send_curl() {
 
         $request = curl_exec($this->ch);
@@ -812,6 +859,13 @@ class Httprequest {
 
     }
 
+    /**
+     * Send data via STREAM
+     *
+     * @return  string
+     * 
+     * @throws  \Comodojo\Exception\HttpException
+     */
     private function send_stream() {
 
         $url = Url::createFromUrl($this->address);
@@ -866,7 +920,14 @@ class Httprequest {
 
     }
 
-    static private function tokenizeHeaders($headers) {
+    /**
+     * Tokenize received headers
+     *
+     * @param   string  $headers
+     *
+     * @return  array
+     */
+    private static function tokenizeHeaders($headers) {
 
         $return = array();
 
