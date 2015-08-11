@@ -26,7 +26,7 @@ class Httprequest {
     /**
      * Remote host address (complete url)
      *
-     * @var url
+     * @var string
      */
     private $address = null;
     
@@ -65,7 +65,7 @@ class Httprequest {
      *
      * @var string
      */
-    private $authenticationMethod = false;
+    private $authenticationMethod = null;
     
     /**
      * Remote host auth username
@@ -374,7 +374,7 @@ class Httprequest {
     /**
      * Set HTTP method to use
      *
-     * @param   string  $mehod  HTTP METHOD
+     * @param   string  $method  HTTP METHOD
      *
      * @return  \Comodojo\Httprequest\Httprequest
      * 
@@ -505,10 +505,21 @@ class Httprequest {
     public function send($data = null) {
         
         try {
-        
-            $init = $this->curl ? $this->init_curl($data) : $this->init_stream($data);
 
-            $received = $this->curl ? $this->send_curl() : $this->send_stream();
+            if ( $this->curl ) {
+
+                $this->init_curl($data);
+
+                $received = $this->send_curl();
+
+            } else {
+
+                $this->init_stream($data);
+
+                $received = $this->send_stream();
+
+            }
+        
 
         } catch (HttpException $ioe) {
             
@@ -530,10 +541,20 @@ class Httprequest {
     public function get() {
         
         try {
-        
-            $init = $this->curl ? $this->init_curl(NULL) : $this->init_stream(NULL);
 
-            $received = $this->curl ? $this->send_curl() : $this->send_stream();
+            if ( $this->curl ) {
+
+                $this->init_curl(NULL);
+
+                $received = $this->send_curl();
+
+            } else {
+
+                $this->init_stream(NULL);
+
+                $received = $this->send_stream();
+
+            }
 
         } catch (HttpException $ioe) {
             
@@ -561,7 +582,7 @@ class Httprequest {
 
         $this->httpVersion = "1.0";
 
-        $this->authenticationMethod = false;
+        $this->authenticationMethod = null;
 
         $this->user = null;
 
