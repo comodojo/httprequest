@@ -493,6 +493,17 @@ class Httprequest {
     }
 
     /**
+     * Get transport channel (curl channel or stream context)
+     *
+     * @return  mixed
+     */
+    final public function getChannel() {
+
+        return $this->ch;
+
+    }
+
+    /**
      * Init transport and send data to the remote host.
      * 
      * @return  string

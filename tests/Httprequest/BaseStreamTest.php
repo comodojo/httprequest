@@ -8,4 +8,16 @@ class BaseStreamTest extends \Comodojo\Httprequest\Tests\Base {
 
     }
 
+    public function testGetChannel() {
+
+        $this->http->setHost("http://httpbin.org")->get();
+
+        $channel = $this->http->getChannel();
+
+        $this->assertInternalType('resource', $channel);
+
+        $this->assertEquals('stream-context', get_resource_type($channel));
+
+    }
+
 }
