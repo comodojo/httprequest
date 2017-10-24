@@ -157,6 +157,13 @@ class Httprequest {
     private $ch = false;
 
     private $stream_get_data = null;
+
+    /**
+     * Ignore Errors (stream only)
+     *
+     * @var boolean
+     */
+    private $ignore_errors = false;
     
     /**
      * Class constructor
@@ -390,6 +397,21 @@ class Httprequest {
         }
 
         $this->method = $method;
+
+        return $this;
+
+    }
+
+    /**
+     * Set whether or not to ignore errors
+     *
+     * @param   boolean $ignore    Should stream ignore errors
+     *
+     * @return  \Comodojo\Httprequest\Httprequest
+     */
+    final public function setIgnoreErrors($ignore = true) {
+
+        $this->ignore_erors = $ignore;
 
         return $this;
 
@@ -818,6 +840,10 @@ class Httprequest {
 
         if ( $this->authenticationMethod == "BASIC" ) array_push($stream_options['http']['header'], 'Authorization: Basic  '.base64_encode($this->user.":".$this->pass));
         
+        if ( $this->ignore_errors ) {
+            $stream_options['http']['ignore_errors'] = true;
+        }
+
         foreach ( $this->getHeaders() as $header => $value ) {
 
             if ( is_null($value) ) array_push($stream_options['http']['header'], $header);
