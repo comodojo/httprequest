@@ -411,7 +411,7 @@ class Httprequest {
      */
     final public function setIgnoreErrors($ignore = true) {
 
-        $this->ignore_erors = (bool)$ignore;
+        $this->ignore_errors = (bool)$ignore;
 
         return $this;
 
