@@ -27,14 +27,15 @@
             "Comodojo\\Httprequest\\": "src"
         }
     },
+    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.0",
-        "league/url": "~3.0",
-        "comodojo/exceptions": "@stable"
+        "league/url": "^3.0",
+        "comodojo/exceptions": "dev-master"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.0",
-        "scrutinizer/ocular": "~1.1"
+        "phpunit/phpunit": "^4.0|^5.0",
+        "scrutinizer/ocular": "^1.0"
     },
     "suggest": {
         "ext-curl": "Make requests using curl instead of stream"
