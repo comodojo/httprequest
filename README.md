@@ -18,7 +18,7 @@ Main features:
 
 Install [composer](https://getcomposer.org/), then:
 
-`` composer require comodojo/httprequest 1.2.* ``
+`` composer require comodojo/httprequest ``
 
 ## Basic usage
 

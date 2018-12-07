@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.3.0
+
+- dependencies updated
+- ignore errors flag (stream only) added (thanks @tljennings)
+
 ## Version 1.2.1
 
 - added comodojo/exceptions as a dependency
