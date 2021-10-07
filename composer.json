@@ -1,5 +1,5 @@
 {
-    "name": "comodojo/httprequest",
+    "name": "pmarcelli/httprequest",
     "description": "HTTP request library",
     "license": "MIT",
     "type": "library",
