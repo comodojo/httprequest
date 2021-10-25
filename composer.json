@@ -28,7 +28,7 @@
         }
     },
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=^7.3",
         "league/url": "^3.0",
         "pmarcelli/exceptions": "dev-exceptions_u7320"
     },
