@@ -4,6 +4,8 @@
 
 HTTP request library
 
+***This is the development branch, please do not use it in production***
+
 Main features:
 
 - BASIC, NTLM, DIGEST and SPNEGO auth (requires [php curl library](http://php.net/manual/en/book.curl.php)) authentication support
